@@ -26,12 +26,12 @@ def get_videos(url, extra_params):
     Get a list with a dict for every video founded
     '''
     ydl_params = {
-    'format': 'bestaudio/best',
+    'format': 'bestaudio[ext=m4a]/bestaudio/best',
     'cachedir': False,
     'logger': current_app.logger.getChild('youtube-dl'),
     'cookiefile': 'cookies.txt',
     'noplaylist': True,
-}
+    }
     ydl_params.update(extra_params)
     ydl = SimpleYDL(ydl_params)
     res = ydl.extract_info(url, download=False)
@@ -160,8 +160,26 @@ def info():
 
 @route_api('play')
 def play():
+
     result = flatten_result(get_result())
-    return redirect(result[0]['url'])
+
+    video = result[0]
+
+    if 'url' in video:
+        return redirect(video['url'])
+
+    formats = video.get('formats', [])
+
+    for f in formats:
+
+        if f.get('acodec') != 'none':
+
+            if f.get('url'):
+                return redirect(f['url'])
+
+    return jsonify({
+        'error': 'No playable format found'
+    }), 500
 
 
 @route_api('extractors')

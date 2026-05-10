@@ -26,11 +26,12 @@ def get_videos(url, extra_params):
     Get a list with a dict for every video founded
     '''
     ydl_params = {
-    'format': 'best',
+    'format': 'bestaudio/best',
     'cachedir': False,
     'logger': current_app.logger.getChild('youtube-dl'),
     'cookiefile': 'cookies.txt',
-    }
+    'noplaylist': True,
+}
     ydl_params.update(extra_params)
     ydl = SimpleYDL(ydl_params)
     res = ydl.extract_info(url, download=False)
